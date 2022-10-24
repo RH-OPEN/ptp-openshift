@@ -156,7 +156,7 @@ https://github.com/sclorg/nodejs-ex.git
 > 右ペインの詳細 (Delailes) タブに表示されている青い円の横にある上や下の矢印を押すと、Pod の数の増減が出来ます。簡単にスケールアップ、スケールダウンが出来るオペレーション是非試してみてください。
 
 
-* **右上の `URL を開く` アイコン(アプリケーションアイコンを囲む青い二重の円の右上の、右上向きの矢印)をクリックして、アプリケーションのルートにアクセスしてみてください。**
+* **右上の `URL を開く` アイコン(node.jsアプリケーションアイコンを囲む青の円の右上の、右上向きの矢印)をクリックして、アプリケーションのルートにアクセスしてみてください。**
 
 ![nodejs-ex アプリ](./images/03_2_import_from_git_form_url_result.png)
 <div style="text-align: center;">nodejs-ex アプリ</div>
@@ -179,7 +179,7 @@ https://github.com/sclorg/nodejs-ex.git
     https://github.com/RedHatGov/openshift-workshops.git
     ```
 
-    * "Show advanced Git options"(日本語UI：詳細のGitオプションの表示)を表示し、表示されたメニューから"Context dir"(日本語UI：コンテキストディレクトリー)を設定します：
+    * "Show advanced Git options"(日本語UI："詳細のGitオプションの表示")を表示し、表示されたメニューから"Context dir"(日本語UI："コンテキストディレクトリー")を設定します：
     ```
     /dc-metro-map
     ```
