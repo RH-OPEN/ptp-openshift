@@ -152,7 +152,7 @@ Nationalparksバックエンド用のTektonパイプラインを作成します�
 
 Pipelineリソース
 ```
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: nationalparks-pipeline
