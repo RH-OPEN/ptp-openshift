@@ -1,0 +1,119 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: nationalparks-pipeline
+spec:
+  params:
+    - default: nationalparks
+      name: APP_NAME
+      type: string
+    - default: 'https://github.com/openshift-roadshow/nationalparks.git'
+      description: The application git repository url
+      name: APP_GIT_URL
+      type: string
+    - default: master
+      description: The application git repository revision
+      name: APP_GIT_REVISION
+      type: string
+  tasks:
+    - name: git-clone
+      params:
+        - name: URL
+          value: $(params.APP_GIT_URL)
+        - name: REVISION
+          value: $(params.APP_GIT_REVISION)
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SSL_VERIFY
+          value: 'true'
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'true'
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: output
+          workspace: app-source
+    - name: build-and-test
+      params:
+        - name: MAVEN_IMAGE
+          value: gcr.io/cloud-builders/mvn
+        - name: GOALS
+          value:
+            - package
+        - name: PROXY_PROTOCOL
+          value: http
+      runAfter:
+        - git-clone
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: maven
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: app-source
+        - name: maven_settings
+          workspace: maven_settings
+    - name: build-image
+      params:
+        - name: IMAGE
+          value: 'image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest'
+        - name: BUILDER_IMAGE
+          value: 'registry.redhat.io/rhel8/buildah@sha256:82aa9592f3262313ec52f7a2335641e2581b0d0d9807980846d0539bb77d0657'
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
+        - name: TLSVERIFY
+          value: 'true'
+        - name: FORMAT
+          value: oci
+      runAfter:
+        - build-and-test
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: app-source
+    - name: redeploy
+      params:
+        - name: SCRIPT
+          value: oc rollout restart deployment/$(params.APP_NAME)
+      runAfter:
+        - build-image
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+  workspaces:
+    - name: app-source
+    - name: maven_settings
